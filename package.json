@@ -1,0 +1,11 @@
+{
+  "name": "ai-smart-kitchen",
+  "version": "1.0.0",
+  "description": "Gustora AI - Smart Cooking Guidance Web Application",
+  "scripts": {
+    "start": "serve -s . -l $PORT"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}
