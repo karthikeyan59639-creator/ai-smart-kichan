@@ -5,6 +5,7 @@ Multimodal Dish Recognition, and Culinary Assistant Chat.
 """
 
 from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -26,6 +27,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Detect workspace root to serve frontend static assets
+current_dir = os.path.dirname(os.path.abspath(__file__))
+workspace_root = os.path.dirname(current_dir) if os.path.basename(current_dir) == "backend" else current_dir
+
+for folder in ["css", "js", "assets"]:
+    target_path = os.path.join(workspace_root, folder)
+    if os.path.isdir(target_path):
+        app.mount(f"/{folder}", StaticFiles(directory=target_path), name=folder)
 
 # Request Models
 class PantrySearchRequest(BaseModel):
@@ -109,8 +119,20 @@ RECIPES_DB = [
     }
 ]
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def home():
+    index_file = os.path.join(workspace_root, "index.html")
+    if os.path.isfile(index_file):
+        return FileResponse(index_file)
+    return {
+        "status": "healthy",
+        "service": "Gustora AI Culinary Engine",
+        "docs": "/docs",
+        "version": "1.0.0"
+    }
+
+@app.get("/api/health")
+def health():
     return {
         "status": "healthy",
         "service": "Gustora AI Culinary Engine",
